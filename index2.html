@@ -1,0 +1,707 @@
+<!DOCTYPE html PUBLIC "-//WAPFORUM//DTD XHTML Mobile 1.0//EN" "http://www.wapforum.org/DTD/xhtml-mobile10.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <title>显示端节目单操控</title>
+    <link rel="stylesheet" href="css/mycss.css"/>
+    <script type="text/javascript" src="js/jquery-1.11.3.min.js"></script>
+    <script type="text/javascript">
+        function toUtf8(str) {
+            var out, i, len, c;
+            out = "";
+            len = str.length;
+            for(i = 0; i < len; i++) {
+                c = str.charCodeAt(i);
+                if ((c >= 0x0001) && (c <= 0x007F)) {
+                    out += str.charAt(i);
+                } else if (c > 0x07FF) {
+                    out += String.fromCharCode(0xE0 | ((c >> 12) & 0x0F));
+                    out += String.fromCharCode(0x80 | ((c >>  6) & 0x3F));
+                    out += String.fromCharCode(0x80 | ((c >>  0) & 0x3F));
+                } else {
+                    out += String.fromCharCode(0xC0 | ((c >>  6) & 0x1F));
+                    out += String.fromCharCode(0x80 | ((c >>  0) & 0x3F));
+                }
+            }
+            return out;
+        }
+    </script>
+    <!--启用下面部分可用来在网页上生成二维码
+    <script type="text/javascript" src="js/jquery.qrcode.js"></script>
+    <script type="text/javascript" src="js/qrcode.js"></script>
+    <p>Render in table</p>
+    <div id="qrcodeTable"></div>
+    <p>Render in canvas</p>
+    <div id="qrcodeCanvas"></div>
+    <script type="text/javascript">
+        jQuery('#qrcodeTable').qrcode({
+            render	: "table",
+                    width   : 200,
+                    height  : 200,
+            text	: toUtf8("http://www.wisepeak.com")
+        });
+            //qrcodeCanvas方式好在可以在其上继续画其它内容
+        jQuery('#qrcodeCanvas').qrcode({
+            text	: toUtf8("http://www.wisepeak.com")
+        });
+    </script>!-->
+
+</head>
+<body>
+<div>
+    <header>
+        智能控制系统
+    </header>
+    <div class="page1" >
+        <div id="channelBar" >
+            <ul name="channelList" id="channelList">
+            </ul>
+        </div>
+    </div>
+    <div class="page2" >
+        <div id="back"></div>
+        <input name="menuInfo" type="hidden" id="menuInfo" value="menuInfo" />
+        <input name="menuPath" type="hidden" id="menuPath" value="menuPath" />
+        <div id="toolbarId">
+            <div class="toolbar">
+                <ul id="cmdBar" class="bar">
+                    <li class="sendCmd" onclick="docmd(69,0)" style="display:none;" >手动模式</li>
+                    <li class="sendCmd" style="display:none;" onclick="docmd(14,0)" id="upJ">上一页</li>
+                    <li class="sendCmd" style="display:none;" onclick="docmd(13,0)" id="downJ">下一页</li>
+                    <li class="sendCmd" onclick="docmd(11,0)" >启 动</li>
+                    <li class="sendCmd" onclick="docmd(21,0)" >暂停/继续</li><!--新添-->
+                    <li class="sendCmd" onclick="docmd(70,0)" >停止节目单</li>
+                    <li class="sendCmd" onclick="docmd(29,getSoundNum(10))" id="volum1"></li>
+                    <li class="sendCmd" onclick="docmd(29,getSoundNum(-10))" id="volum2"></li>
+                    <li class="sendCmd" onclick="docmd(29,getSoundNum(-255))" id="volum3"></li>
+                    <li class="sendCmd" style="display:none;" onclick="docmd(100,2)" >最大化</li>
+                    <li class="sendCmd" style="display:none;" onclick="docmd(100,0)" >最小化</li>
+                </ul>
+            </div>
+        </div>
+        <div style=" font-size:1.5em; font-weight:bold; padding-left:1em;">播放内容：<span id="title"></span></div>
+        <div id="menuItemList"></div>
+        <div id="hiddenItemCtrlBar" style="display:none;" >
+            <div class="itemInfo"></div>
+            <div id="itemCtrlBar" >
+                <ul>
+                    <li cmdStr="" onclick="" title="TurnTask">播放任务</li>
+                    <li cmdStr="" onclick="" title="StopTask">停止播放</li>
+                    <li cmdStr="" onclick="" title="PageDown">下一页</li>
+                    <li cmdStr="" onclick="" title="PageUp">上一页</li>
+                    <li cmdStr="" onclick="" title="Home">首 页</li>
+                    <li cmdStr="" onclick="" title="End">尾 页</li>
+
+                </ul>
+            </div>
+        </div>
+        <div dir="loadingMark"></div>
+    </div>
+
+</div>
+
+</body>
+<script>
+    /*#define STARTTASK 11
+     #define GOTOFIRSTTASK 12      //发出下面4个指令时，如果第一个参数为0，则表示按节目单顺序跳转，如果为2则表示为按布局跳转
+     #define GOTONEXTTASK 13
+     #define GOTOPREVIOUSTASK 14
+     #define GOTOLASTTASK 15
+     #define GOTOTASK 16           //直接跳转到给定的任务号
+     #define REFRESHPAGE 17
+     #define REFRESHTASK 18
+     #define CLEARTASKDIR 19
+     #define STOPTASK 20
+     #define PAUSETASK 21
+     #define ASKFORCONTROL 22
+     #define POLLINGQUERY 23
+     #define RCOMMAND 24
+     #define STARTTEMPTASK 25
+     #define STOPTEMPTASK 26
+     #define STARTTEMPETASK 27
+     #define STOPTEMPETASK 28
+     #define SETVOLUME 29
+     #define VOLUMEARRANGE 30
+     #define RESTARTSOFTWARE 31
+     #define GETCLIENTLOGFILE 32
+     #define GETCLIENTSPECIALFILE 33
+
+     #define ONLYSTOPSUBJECT 34    //停止当前指定栏目播放
+     #define ONLYREFRESHSUBJECT 35 //刷新栏目，但播放位置和状态保留,给出要刷新栏目id
+     #define TASKGOBACK 36         //向回退版节目单，用先前节目单,给出退版步数
+     #define STARTRTPSESSION 37
+     #define STARTRTPFILE 38
+     #define STOPRTPFILE 39
+     #define STOPRTPSESSION 40
+     #define STARTP2PSESSION 41    //启动P2PClientIf.exe模块程序,启动分块P2P过程
+     #define STARTP2PFILE 42       //启动所有分块P2P下载和上传
+     #define STOPP2PFILE 43        //停止所有分块P2P下载和上传
+     #define STOPP2PSESSION 44     //关闭P2PClientIf.exe模块程序,退出分块P2P过程
+     #define OUTWAKEUPONLAN 45
+     #define ENABLETASKPLAY 46
+     #define DEABLETASKPLAY 47
+     #define GETPLAYLOG 48            //获取最新日志,在月末的时候确认获取一下全部未传递完毕的,便于统计当月的
+     #define TODAYNOSHUTDOWN 49       //今天不自动关机(包括远程关机),用于在下班的时候进行系统升级,升级完毕后可将其自动关掉
+     #define CANCELTODAYNOSHUTDOWN 50 //取消今天不自动关机
+     #define GOTOTASKBYITEMNAME 51    //根据任务项名称或者任务项名称中的序号(后面_index部分)跳转定位
+     #define GETSAMPLEDATE 52         //发指令给显示端,让显示端上报采样数据
+     #define ONLYCLEARINIFILE 53      //删除以前发布的节目单文件，是default_*.ini形式的
+     #define ONLYCLEARPART1 54        //删除终端除当前节目单之外所有无用文件。
+     #define ONLYCLEARPART2 55        //删除终端除当前节目单之外，且日期为半年前的所有无用文件。
+     #define STARTDISTRIBUTSERVER 56  //调用控制中心界面上的控制室-〉后台分发管理-〉开始/继续分发启动
+     #define RESTARTDISTRIBUTSERVER 57//调用控制中心界面上的控制室-〉后台分发管理-〉重新启动分发
+     #define MINIMIZECLIENTWINDOW 58  //从控制室操作的最下化显示端窗口
+     #define GOTOTASKBYMENUITEMID 59  //根据素材号@布局名#窗口号来跳转定位，如果没有给出布局名或者窗口名，则找最先出现该素材ID号的地方节目项显示
+     #define STARTTEMPTASKBYMARK 60   //2013-08-29增加通过临时任务节目单名称tdefault#nnn.ini后面nnn标记数字来选择启动哪个临时任务（即临时任务可以多个）
+     #define STARTTEMPETASKBYMARK 61
+     #define REFRESHPAGEBYTASKMARK 62  //2013-08-29通过给定的节目项ID号(节目项名称后面的ID)来刷新窗口
+     #define SENDVIRTUALKEY 63         //2013-10-02发虚拟键盘码，参数为一个字符串，可以模拟发组合键，支持Alt+Ctrl+Del
+     #define GOTOEQTASKBYITEMNAME 65   //2013-09-26跳转到大于等于该标记记录之后的任务项.如果发现已经在该位置及之后了(链表中),则不进行任何动作
+     #define GOTOALLTASKBYITEMNAME 66  //跳转到任务名称中给出ID的任务项,对布局中的所有窗口都进行,该功能可以实现窗口间播放联动
+     #define PLAYTASKBYTASKID 67       //直接全屏幕播放指定taskid和subtaskid的节目项，注意播放PPT用PPTVIEW.EXE来播放，这样可以直接控制翻页等操作。视频用NBPlayer.exe播放，都用专用播放器来播放。
+     #define PLAYTASKBYMENUITEMID 68   //直接全屏幕播放指定素材ID的节目项，注意播放PPT用PPTVIEW.EXE来播放，这样可以直接控制翻页等操作。视频用NBPlayer.exe播放
+     #define STARTTASKFORHAND 69       //手动启动任务，此时只建立链表节点，不播放，该情况用于后续有手动的对链表的操作，比如全屏播放等。对于全屏播放的文件，停止也应该用该指令。该指令应在启动任务后执行（目的是读入播放链表）
+     #define STOPTASKFORHAND 70        //启动任务后的停止任务播放，此时不清空链表节点，该情况用于后续有手动的对链表的操作，比如全屏播放等。对于全屏播放的文件，停止也应该用该指令。该指令应在启动任务后执行（目的是读入播放链表）
+     #define GOTOTASKBYCASE 71         //根据条件跳转到哪个任务号或者后面_index部分，自己不能跳转到自己，参数为字符串，格式[周1;周二;@taskid1][10.1;@taskid2][default;@taskid3]，其中的@后面数字表示要跳转的taskid，如果为*则后面数字表示要跳转的为任务名中的_index数字部分。多个周几或者日期后加分号隔开
+     #define QUERYCHANNEL 72           //查询显示端的节目频道列表，以XML形式返回频道列表
+     #define TURNTOCHANNEL 73          //新建/转到节目单频道,参数应该是：节目单名[最末级目录名] 样式
+     #define POLLINGCONTROLROOMSTATE 99  //查询CGI和控制室是否通讯正常（控制室是否异常或者退出）
+     #define GETCONTROLROOMSTATE 100     //用于在网页上与控制中心通信，获取控制室运行状态；对于本地广播该消息，用于控制显示端最小化或者还原。
+     #define PLAYER_PLAYCONTROL 3000     //控制播放程序的播放。3001设置播放声音。value=0表示最小声音（范围：0-255）；3002暂停播放；3003继续播放；3009表示跳转到哪一时间点/桢进行播放，参数有正负之分，如果为时间则单位为毫秒。
+
+
+
+
+     #define XK_space            0x020
+
+     #define XK_dead_grave       0xFE50
+     #define XK_dead_acute       0xFE51
+     #define XK_dead_circumflex  0xFE52
+     #define XK_dead_tilde       0xFE53
+
+     #define XK_BackSpace	 0xFF08
+     #define XK_Tab	     0xFF09
+     #define XK_Linefeed	     0xFF0A
+     #define XK_Clear	     0xFF0B
+     #define XK_Return	     0xFF0D
+     #define XK_Pause	     0xFF13
+     #define XK_Scroll_Lock	 0xFF14
+     #define XK_Sys_Req	     0xFF15
+     #define XK_Escape	     0xFF1B
+
+     #define XK_Delete	     0xFFFF
+
+     #define XK_Home	 0xFF50
+     #define XK_Left	 0xFF51
+     #define XK_Up	 0xFF52
+     #define XK_Right	 0xFF53
+     #define XK_Down	 0xFF54
+     #define XK_Page_Up	 0xFF55
+     #define XK_Page_Down	0xFF56
+     #define XK_End	 0xFF57
+     #define XK_Begin	 0xFF58
+
+     #define XK_Select	 0xFF60
+     #define XK_Print	 0xFF61
+     #define XK_Execute	 0xFF62
+     #define XK_Insert	 0xFF63
+
+     #define XK_Cancel	 0xFF69
+     #define XK_Help	 0xFF6A
+     #define XK_Break	 0xFF6B
+     #define XK_Num_Lock	 0xFF7F
+
+     #define XK_KP_Space	 0xFF80
+     #define XK_KP_Tab	 0xFF89
+     #define XK_KP_Enter	 0xFF8D
+
+     #define XK_KP_Home	 0xFF95
+     #define XK_KP_Left	 0xFF96
+     #define XK_KP_Up	 0xFF97
+     #define XK_KP_Right	 0xFF98
+     #define XK_KP_Down	 0xFF99
+     #define XK_KP_Prior	 0xFF9A
+     #define XK_KP_Page_Up	0xFF9A
+     #define XK_KP_Next	 0xFF9B
+     #define XK_KP_Page_Down	0xFF9B
+     #define XK_KP_End	 0xFF9C
+     #define XK_KP_Begin	 0xFF9D
+     #define XK_KP_Insert	0xFF9E
+     #define XK_KP_Delete	0xFF9F
+     #define XK_KP_Equal	 0xFFBD
+     #define XK_KP_Multiply	0xFFAA
+     #define XK_KP_Add	 0xFFAB
+     #define XK_KP_Separator	0xFFAC
+     #define XK_KP_Subtract	0xFFAD
+     #define XK_KP_Decimal	0xFFAE
+     #define XK_KP_Divide	0xFFAF
+
+     #define XK_KP_F1	 0xFF91
+     #define XK_KP_F2	 0xFF92
+     #define XK_KP_F3	 0xFF93
+     #define XK_KP_F4	 0xFF94
+
+     #define XK_KP_0	 0xFFB0
+     #define XK_KP_1	 0xFFB1
+     #define XK_KP_2	 0xFFB2
+     #define XK_KP_3	 0xFFB3
+     #define XK_KP_4	 0xFFB4
+     #define XK_KP_5	 0xFFB5
+     #define XK_KP_6	 0xFFB6
+     #define XK_KP_7	 0xFFB7
+     #define XK_KP_8	 0xFFB8
+     #define XK_KP_9	 0xFFB9
+
+     #define XK_F1	 0xFFBE
+     #define XK_F2	 0xFFBF
+     #define XK_F3	 0xFFC0
+     #define XK_F4	 0xFFC1
+     #define XK_F5	 0xFFC2
+     #define XK_F6	 0xFFC3
+     #define XK_F7	 0xFFC4
+     #define XK_F8	 0xFFC5
+     #define XK_F9	 0xFFC6
+     #define XK_F10	 0xFFC7
+     #define XK_F11	 0xFFC8
+     #define XK_F12	 0xFFC9
+     #define XK_F13	 0xFFCA
+     #define XK_F14	 0xFFCB
+     #define XK_F15	 0xFFCC
+     #define XK_F16	 0xFFCD
+     #define XK_F17	 0xFFCE
+     #define XK_F18	 0xFFCF
+     #define XK_F19	 0xFFD0
+     #define XK_F20	 0xFFD1
+     #define XK_F21	 0xFFD2
+     #define XK_F22	 0xFFD3
+     #define XK_F23	 0xFFD4
+     #define XK_F24	 0xFFD5
+
+
+     #define XK_Shift_L	 0xFFE1
+     #define XK_Shift_R	 0xFFE2
+     #define XK_Control_L	0xFFE3
+     #define XK_Control_R	0xFFE4
+     #define XK_Caps_Lock	0xFFE5
+     #define XK_Shift_Lock	0xFFE6
+     #define XK_Meta_L	 0xFFE7
+     #define XK_Meta_R	 0xFFE8
+     #define XK_Alt_L	 0xFFE9
+     #define XK_Alt_R	 0xFFEA
+     */
+    (function selSuit(){
+        var url,username,password,xmldata;
+        var html=document.getElementsByTagName("html")[0];
+        var cw=document.documentElement.clientWidth;
+        var ch=document.documentElement.clientHeight;
+        //console.log(cw);
+        //设置html的 fontsize
+        var html_fontsize=html.style.fontSize=cw/100+"px";
+        //设置左中右布局的高度
+
+//        var ch_rem=ch/parseFloat(html_fontsize)-11+"rem";
+        window.onresize=selSuit;
+        //console.log("font-size:"+html.style.fontSize);
+//飞入左右选取
+//    获取节目单
+        url="wpgetxmlids.asp?rnd="+Math.random(999);
+        getChannelList(url);
+    })();
+
+    $(function(){
+        //刷新读取数据功能
+		
+        var url,username,password,xmldata;
+        url="wpgetxmlids.asp?rnd="+Math.random(999);
+        $("#loadingMark").width($(document).width());
+        $("#loadingMark").height($(document).height());
+        $("#loadingMark").show(100);
+        $("#channelList").on("click","a",function(event){
+            if(event.target.tagName=="A"){
+                var value=event.target.innerHTML+"11"; //69切换之后手动 11自动播放
+                //console.log(value);
+                value=encodeURI(value);
+                value="utf-8"+value;
+                docmd(73,"'"+ value+"'");
+                window.setTimeout("getChannelList();",2000);//触发加载数据事件
+                $(".page1").slideUp(500);
+                $(".page2").slideDown(500);
+            }
+
+            $.ajax({
+                data:{username:username,password:password},
+                url: url,
+                dataType: 'xml',
+                type: 'GET',		//提交方式
+                timeout: 35000,		//失败时间
+                error: function(xml)
+                {
+                },
+                success: function(xml)
+                {
+                    $("#menuItemList").html("");
+                    var userInfo=$(xml).find("userInfo");
+                    var clientInfo=$(xml).find("clientInfo");//获得终端信息标签
+                    var menuID=$(clientInfo).attr("menuID");
+                    var hostName=$(clientInfo).attr("hostName");
+                    var clientName=$(clientInfo).attr("clientName");
+                    var menuInfo=$(clientInfo).attr("menuInfo");  //获取当前节目单信息
+                    var menuPath=$(clientInfo).attr("menuPath");
+                    var playVol=$(clientInfo).attr("playVol");
+                    var mplayVol="128";
+                    var volokget=0;
+                    var findex=playVol.indexOf("_");
+                    if (findex>=0)
+                    {
+                        //if (parseInt(playVol.substr(findex+1,1))==1)
+                        //{
+                        playVol=playVol.substr(0,findex);
+                        //}
+                        findex=playVol.indexOf("/");
+                        if (findex>=0)
+                        {
+                            mplayVol=playVol.substr(findex+1,playVol.length-findex-1);
+                            playVol=playVol.substr(0,findex);
+                        }
+                    }
+                    $("#menuInfo").val(menuInfo);				//当前节目单名称存到隐藏域
+                    $("#menuPath").val(menuPath);
+                    var clientInfobarHtml="<span>终端名称："+clientName+"</span><span style='margin-left:2em;'>计算机名："+hostName+"</span>";
+                    clientInfobarHtml=clientInfobarHtml+"<div>节目单名："+menuInfo +"</div>"
+                    clientInfobarHtml=clientInfobarHtml+"<div id=\"soundnum\">"+playVol+"</div><div id=\"ItemSoundNum\">"+mplayVol+"</div>";
+                    $("#clientInfoBar").html(clientInfobarHtml);
+//alert($(xml).text());
+                    $(xml).find("item").each(function(i)//遍历每个节目项并加载到页面中
+                    {
+                        var itemType,markID,iconLink,descLink,downLink,taskName,moreInfo,taskDesc,duringTime,winFrame,downLink;
+                        //读取所有属性
+                        itemType=$(this).find("itemType").text();  //任务类型
+                        markID=$(this).find("markID").text();		//任务号 素材号-栏目号-主任务号-栏目内任务号
+                        iconLink=$(this).find("iconLink").text();//图标
+                        descLink=$(this).find("descLink").text();	//描述连接
+                        downLink=$(this).find("downLink").text();	//下载、内容连接
+                        taskName=$(this).find("taskName").text();	//任务名
+                        moreInfo=$(this).find("moreInfo");	//其他信息字符串
+                        moreInfo=moreInfo.text().split("\\027");
+                        taskDesc=moreInfo[0];		//任务描述
+						var dd= taskDesc.replace(/<\/?.+?>/g,""); 
+                        var taskDesc=dd.replace(/&nbsp;/g,"");
+                        duringTime=moreInfo[1];		//任务持续时间
+                        winFrame=moreInfo[2];		//任务项所在窗口
+                        var tempMarkID,itemID,columnID,taskID,column_taskID,cmdstr;
+                        //素材号-栏目号-主任务号-栏目内任务号
+                        tempMarkID=markID.split("-");
+                        itemID=tempMarkID[0];   //素材号
+                        columnID=tempMarkID[1];	//栏目号
+                        taskID=tempMarkID[2];	//任务号
+                        column_taskID=tempMarkID[3];//栏目内任务号
+
+                        if(itemID=="0"){itemID=taskID;} //如果素材ID为0则任务号代替
+                        var ctrlBarHtml="<div id='ctrlBar"+markID+"' class='controlBarDiv' ></div>";//节目项控制菜单
+                        //var imagesrc="<span style='position:relative;top:0;left:0;'><img style='width:3em;height:3em;' src='"+iconLink+"' align='absmiddle'/></span>"//类型图片
+                        var tempstr="<div class='menuitem' itemType='"+itemType+"' markID='"+markID+"' iconLink='"+iconLink+"' descLink='"+descLink+"' downLink='"+downLink+"' taskName='"+taskName+"' moreInfo='"+moreInfo+"' taskDesc='"+taskDesc+"' duringTime='"+duringTime+"' winFrame='"+winFrame+"' downLink='"+downLink+"'  onclick=\"showCtrlBar('ctrlBar"+markID+"','"+taskID+"',"+itemType+");\" itemid='"+itemID +"'>"+taskDesc+"</div>";
+                        $("#menuItemList").append(tempstr);
+                    });
+                    timeShowMsg("title","加载数据成功！",500);
+                }
+            });
+
+
+        });
+        //控制弹出菜单
+    });
+
+    //获取终端频道信息函数
+    function getChannelList(){
+        url="wpgetxmlids.asp?rnd="+Math.random(999);
+        $.ajax({
+            data:{gettype:"channel"},
+            url: url,
+            dataType: 'xml',
+            type: 'GET',		//提交方式
+            timeout: 15000,		//失败时间
+            error: function(xml)
+            {
+                $("#title").text("获取频道数据出错!");
+            },
+            success: function(xml)
+            {
+                var channels=$(xml).find("channel");
+                $("#channelList").html("");
+                channels.each(function(index, element) {
+                    var name,path,desc;
+                    name=$(this).find("name").text();
+                    path=$(this).find("path").text();
+                    desc=$(this).find("desc").text();
+                    if($("#menuPath").val()==path){
+                        $("#channelList").append("<li><a>"+name+"</a></li>");
+                    }else{
+                        $("#channelList").append("<li><a>"+name+"</a></li>");
+                    }
+                });
+
+            }
+        });
+    }
+
+    //发送指令函数
+    function docmd(cmdtype,cmdData){
+        if(!isNaN(cmdtype)){//执行显示端命令
+            cmdstr=cmdtype+","+cmdData;
+            //alert(cmdstr);
+            //发送指令
+            var sendcmdurl="wpsendclientmsg.asp";
+            $.ajax({
+                data:{wpsendclientmsg:cmdstr},
+                url: sendcmdurl,
+                dataType:'html',
+                type: 'GET',
+                timeout: 15000,		//超时时间
+                error:function(xml){
+                    //alert("发送指令失败");
+                    timeShowMsg("title","发送指令失败",500);		//失败报错
+                },
+                success:function(xml){
+                    if(xml){
+                        timeShowMsg("title","指令发送成功",500);		//发送成功
+                    }
+                }
+            });
+        }
+        if(cmdtype=="keycode"){//发送键盘动作
+            cmdData="-keyevent "+cmdData;
+            var sendcmdurl="wpsendkeys.asp";
+            $.ajax({
+                data:{wpsendkeys:cmdData},
+                url: sendcmdurl,
+                dataType:'html',
+                type: 'GET',
+                timeout: 5000,		//超时时间
+                error:function(xml){
+                    timeShowMsg("title","发送指令失败",500);		//失败报错
+                },
+                success:function(xml){
+                    if(xml){
+                        timeShowMsg("title","指令发送成功",500);		//发送成功
+                    }
+                }
+            });
+        }
+    }
+    function timeShowMsg(objID,msgstr,durTime){		//显示加载状态函数
+        if(objID==""||durTime==null){return false;}
+        if(msgstr==""||durTime==null){return false;}
+        if(durTime==""||durTime==null){durTime=500;}
+        var tempstr=$("#"+objID).text();
+        $("#"+objID).text(msgstr);
+		$("#"+objID).slideDown();
+        window.setTimeout("$('#"+objID+"').text('');",durTime);
+    }
+    function showCtrlBar(barID,taskID,itemtype){
+    		//显示节目项目控制条函数
+		$(".menuitem").click(function(){
+//			$(".menuitem").css("background","url(image/btn_1.png) no-repeat");
+			$(this).css({"background":"url(image/btn_0.png) no-repeat", "backgroundPosition":"top center","backgroundSize": "contain"}).siblings().css({"background":"url(image/btn_1.png) no-repeat", "backgroundPosition":"top center","backgroundSize": "contain"});
+			});
+        var taskName=$(this).attr("taskdesc");
+        //console.log(taskName);
+        var markID = "";
+        var downLink = "";
+        var flag = 0;
+        markID=barID.replace("ctrlBar","");
+//        $(".controlBarDiv").hide();
+        $("#"+barID).show(0);
+        downLink=$("#itemCtrlBar").find("li[title=DownLoadFile]").parents(".controlBarDiv").prev().attr("downLink");
+        if (itemtype == 10 || itemtype == 1010)//处理视频
+        {
+			$("#hiddenItemCtrlBar").show();
+            $("#itemCtrlBar").find("li").show();
+            $("#itemCtrlBar").find("li[title=PageDown]").hide();
+            $("#itemCtrlBar").find("li[title=PageUp]").hide();
+            $("#itemCtrlBar").find("li[title=Home]").text("快进");
+            $("#itemCtrlBar").find("li[title=End]").text("快退");
+            $("#itemCtrlBar").find("li[title=PageDown]").attr("onclick", "docmd(3002,0)"); //暂停播放
+            $("#itemCtrlBar").find("li[title=PageUp]").attr("onclick", "docmd(3003,0)"); //继续播放
+            $("#itemCtrlBar").find("li[title=Home]").attr("onclick", "docmd(3006,0)"); //快进
+            $("#itemCtrlBar").find("li[title=End]").attr("onclick", "docmd(3007,0)"); //快退
+            flag = 1;
+        }
+        else if (itemtype == 8 || itemtype == 1008) //处理ppt
+        {
+			$("#hiddenItemCtrlBar").show();
+            $("#itemCtrlBar").find("li").show();
+            $("#itemCtrlBar").find("li[title=PageDown]").text("上一页");
+            $("#itemCtrlBar").find("li[title=PageUp]").text("下一页");
+            $("#itemCtrlBar").find("li[title=Home]").text("首  页");
+            $("#itemCtrlBar").find("li[title=End]").text("尾  页");
+            $("#itemCtrlBar").find("li[title=PageDown]").attr("onclick", "docmd('keycode','0xFF9B')"); //上一页PPT，PAGEDOWN键
+            $("#itemCtrlBar").find("li[title=PageUp]").attr("onclick", "docmd('keycode','0xFF55')"); //下一页PPT，PAGEUP键
+            $("#itemCtrlBar").find("li[title=Home]").attr("onclick", "docmd('keycode','0xFF50')"); //跳转到PPT第一页，按HOME键
+            $("#itemCtrlBar").find("li[title=End]").attr("onclick", "docmd('keycode','0xFF57')"); //跳转到PPT最后一页，按END键
+        }
+        else if (itemtype == 0 || itemtype == 1000 || itemtype == 12 || itemtype == 1012) //处理其他应用
+        {
+            if (downLink!=null && (downLink.indexOf(".ppt") >= 0 || downLink.indexOf(".pps") >= 0))
+            {
+				$("#hiddenItemCtrlBar").show();
+                $("#itemCtrlBar").find("li").show();
+                $("#itemCtrlBar").find("li[title=PageDown]").text("上一页");
+                $("#itemCtrlBar").find("li[title=PageUp]").text("下一页");
+                $("#itemCtrlBar").find("li[title=Home]").text("首  页").hide();
+                $("#itemCtrlBar").find("li[title=End]").text("尾  页").hide();
+                $("#itemCtrlBar").find("li[title=PageDown]").attr("onclick", "docmd('keycode','0xFF55')"); //上一页PPT，PAGEDOWN键
+                $("#itemCtrlBar").find("li[title=PageUp]").attr("onclick", "docmd('keycode','0xFF9B')"); //下一页PPT，PAGEUP键
+                $("#itemCtrlBar").find("li[title=Home]").attr("onclick", "docmd('keycode','0xFF50')"); //跳转到PPT第一页，按HOME键
+                $("#itemCtrlBar").find("li[title=End]").attr("onclick", "docmd('keycode','0xFF57')"); //跳转到PPT最后一页，按END键
+            }
+            else
+            {
+				$("#hiddenItemCtrlBar").show();
+                $("#itemCtrlBar").find("li").show();
+                $("#itemCtrlBar").find("li[title=PageDown]").text("暂停");
+                $("#itemCtrlBar").find("li[title=PageUp]").text("继续");
+                $("#itemCtrlBar").find("li[title=Home]").text("快进");
+                $("#itemCtrlBar").find("li[title=End]").text("快退");
+                $("#itemCtrlBar").find("li[title=PageDown]").attr("onclick", "docmd(3002,0)"); //暂停播放
+                $("#itemCtrlBar").find("li[title=PageUp]").attr("onclick", "docmd(3003,0)"); //继续播放
+                $("#itemCtrlBar").find("li[title=Home]").attr("onclick", "docmd(3006,0)"); //快进
+                $("#itemCtrlBar").find("li[title=End]").attr("onclick", "docmd(3007,0)"); //快退
+                flag = 1;
+            }
+        }
+        else if(itemtype == 3 || itemtype == 1003){//处理图片
+		$("#hiddenItemCtrlBar").show();
+            $("#itemCtrlBar").find("li").show();
+            $("#itemCtrlBar").find("li[title=PageDown]").text("上一页");
+            $("#itemCtrlBar").find("li[title=PageUp]").text("下一页");
+            $("#itemCtrlBar").find("li[title=Home]").text("首  页").hide();
+            $("#itemCtrlBar").find("li[title=End]").text("尾  页").hide();
+            $("#itemCtrlBar").find("li[title=PageDown]").attr("onclick", "docmd(14,0)"); //上一页PPT，PAGEDOWN键
+            $("#itemCtrlBar").find("li[title=PageUp]").attr("onclick", "docmd(13,0)"); //下一页PPT，PAGEUP键
+            $("#itemCtrlBar").find("li[title=Home]").attr("onclick", "docmd('keycode','0xFF50')").hide(); //跳转到PPT第一页，按HOME键
+            $("#itemCtrlBar").find("li[title=End]").attr("onclick", "docmd('keycode','0xFF57')").hide(); //跳转到PPT最后一页，按END键
+        }
+
+        $("#itemCtrlBar").find("li[title=TurnTask]").attr("onclick","docmd(16,'"+taskID+"')");//跳转到当前任务
+        $("#itemCtrlBar").find("li[title=StopTask]").attr("onclick","docmd(70,'0')");//停止任务，切换到最后一条。
+
+        //$("#"+barID).html($("#hiddenItemCtrlBar").html());
+
+        if (downLink!=null)
+        {
+            if(downLink.indexOf("http:")==0){
+
+            }else if(downLink.indexOf("DisplayFile")==0){
+                downLink="$$"+$("#menuPath").val()+"onlydownload_"+downLink;
+                downLink="http://"+window.location.host+"/"+downLink;
+            }else{
+                downLink="$$"+downLink;
+                downLink="http://"+window.location.host+"/"+downLink;
+            }
+            downLink=encodeURI(downLink);
+        }
+        if (flag == 1)
+        {
+            $("#itemCtrlBar").find("li[title=ViewItem]").text("控制条");
+            $("#itemCtrlBar").find("li[title=ViewItem]").attr("onclick", "docmd(3008,0)"); //显示/隐藏扩展窗口(标题条)
+        }
+        else
+        {
+            $("#itemCtrlBar").find("li[title=ViewItem]").text("预览素材");
+            if (downLink!=null) $("#itemCtrlBar").find("li[title=ViewItem]").attr("onclick","window.open('"+downLink.replace(downLink,"onlydownload_","")+"')");//预览文件
+        }
+        if (downLink!=null) $("#itemCtrlBar").find("li[title=DownLoadFile]").attr("onclick", "window.open('" + downLink + "')");  //下载文件
+
+    }
+    function getSoundNum(num){  //返回系统音量数值函数
+        var soundnum=$("#soundnum").text();
+        soundnum=parseInt(soundnum);
+        num=parseInt(num);
+        tempnum=soundnum+num;
+        if(tempnum<=0){tempnum=0;}
+        if(tempnum>=255){tempnum=255;}
+        $("#soundnum").text(tempnum);
+        return tempnum;
+    }
+    function getItemSoundNum(num){
+        var soundnum=$("#ItemSoundNum").text();
+        soundnum=parseInt(soundnum);
+        num=parseInt(num);
+        tempnum=soundnum+num;
+        if(tempnum<=0){tempnum=0;}
+        if(tempnum>=255){tempnum=255;}
+        //alert(tempnum)
+        $("#ItemSoundNum").text(tempnum);
+        return tempnum;
+    }
+    function changeTab(id){ //切换Tab内容
+        $(".bar").slideUp(100);
+        $("#"+id).slideDown(500);
+    }
+    function getUrl(url){
+        url=document.location.href+url;
+        //alert(url);
+        $.ajax({
+            data:{rnd:Math.random(999)},
+            url: url,
+            dataType:'html',
+            type: 'GET',
+            timeout: 15000,		//超时时间
+            error:function(xml){
+                //alert("发送指令失败");
+                timeShowMsg("title","发送指令失败",500);		//失败报错
+            },
+            success:function(xml){
+                if(xml){
+                    timeShowMsg("title","指令发送成功",500);		//发送成功
+                }
+            }
+        });
+    }
+    function SendMSGBar(id,type){
+        var isShow=$("#"+id).css("display");
+        //alert(isShow);
+        if(type=="show"){  //弹出输入框
+            $("#"+id).css({left:($(document).width()/2)-($("#"+id).width()/2),top:200});
+            $("#"+id).slideDown(200);
+        }else if(type=="send" || type=="send1"){		//发送信息
+            //http://localhost:8080/wpsubmitmsg.asp?wpsubmitmsg=我爱你&icon=0&sid=过客&pmt=
+            //wpsubmitmsg为发布的内容，icon为选择的头像0-30，sid为发布人自己标记，pmt为是否也在屏上悬浮显示（=0只参与网页中滚动显示，〉1表示消息在屏上显示）。
+            var wpsubmitmsg=$("#wpsubmitmsg").val();
+            var icon=$("#icon").val();
+            var sid=$("#sid").val();
+            var pmt=$("#pmt").attr("checked");
+            if(pmt=="checked"){
+                pmt=1;
+            }else{
+                pmt=0;
+            }
+            var url="";
+            if (type=="send")
+                url="wpsubmitmsg.asp?wpsubmitmsg="+wpsubmitmsg+"&icon="+icon+"&sid="+sid+"&pmt="+pmt+"&utf8=1";
+            else
+            {
+                if (sid=="")
+                    url="wpdispqrmsg.asp?wpdispqrmsg="+wpsubmitmsg+"&utf8=1";
+                else
+                    url="wpdispqrmsg.asp?wpdispqrmsg="+wpsubmitmsg+"&utf8=1&wpdispjustmsg="+sid;
+            }
+            getUrl(url);
+            $("#wpsubmitmsg").val("");
+            $("#"+id).slideUp(200);
+        }else if(type=="cancel"){	//取消发送关闭窗口
+            $("#"+id).slideUp(200);
+        }
+    }
+
+    $("#back").click(function(){
+        $(".page2").slideUp("slow");
+        $(".page1").slideDown("slow");
+		$("#hiddenItemCtrlBar").hide();
+    });
+//    添加按钮
+</script>
+
+</html>
+

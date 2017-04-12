@@ -1,0 +1,335 @@
+* {
+  text-decoration: none;
+  list-style: none;
+  color:#fff;
+}
+body, td, th {
+  font-size: small;
+}
+body {
+  font-family: "微软雅黑", "黑体", "宋体";
+  margin-left: 0;
+  margin-top: 0;
+  margin-right: 0;
+  margin-bottom: 0;
+}
+#menutitle {
+  font-size: medium;
+  border:#00F solid 1px;
+  background: #06F;
+  color: #FFF;
+  text-align: center;
+  cursor: pointer;
+  background: -webkit-linear-gradient(#06F, #09F);
+  background: -ms-linear-gradient(#06F, #09F);
+  height: 3em;
+  position:fixed;
+  top:0;
+  left:0;
+  width: 100%;
+  z-index: 999;
+}
+
+
+.cmdBar{
+  margin: 0;
+  padding: 0;
+  text-align: center;
+}
+.cmdBar li{
+
+  list-style: none;
+  cursor: pointer;
+  width: 5em;
+  background: #EEE;
+  padding: 1.2em;
+  margin: 0.2em;
+  text-align: center;
+  -moz-border-radius: 10px;   /* Gecko browsers */
+  -webkit-border-radius: 10px;   /* Webkit browsers */
+  border-radius: 10px;            /* W3C syntax */
+  background: -webkit-linear-gradient(#39F, #6FF);
+  background: -ms-linear-gradient(#39F, #6FF);
+  display: inline-block;
+}
+#cmdBar {
+  margin-left:5rem;
+  padding: 0;
+  text-align: center;
+}
+#moreMenu {
+  width: 3.2em;
+  text-align: center;
+  cursor: pointer;
+  z-index: 999;
+}
+#moreMenuRight {
+  position: relative;
+  width: 3.2em;
+  text-align: center;
+  cursor: pointer;
+  left: 95%;
+  border: #000 solid 1px;
+  z-index: 999;
+}
+.moreMenuIcon {
+  background: #fFF;
+  width: 1.5em;
+  height: 0.3em;
+  position: relative;
+  margin: 0.3em;
+  cursor: pointer;
+}
+#clientInfoBar {
+  text-align: center;
+  padding: 1em;
+}
+
+#itemCtrlBar ul {
+  margin: 0;
+  padding: 0;
+  text-align: center;
+}
+#itemCtrlBar{
+  width: 80rem;
+  position: absolute;
+  top: 5rem;
+  margin-left:5rem;
+}
+#loadingMark {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: #333;
+}
+.smallbtn{
+  list-style: none;
+  cursor: pointer;
+  background: #EEE;
+  padding: 0.5em;
+  margin: 0.5em;
+  text-align: center;
+  -moz-border-radius: 5px;   /* Gecko browsers */
+  -webkit-border-radius: 5px;   /* Webkit browsers */
+  border-radius: 5px;            /* W3C syntax */
+  background: -webkit-linear-gradient(#39F, #6FF);
+  background: -ms-linear-gradient(#39F, #6FF);
+}
+#channelList{
+  font-size:medium;
+  width:80rem;
+  margin:0 auto;
+}
+#channelBar{
+  padding:1em;
+  display:block;
+}
+
+
+.page1,.page2,
+#channelList:after {
+  content: "";
+  display: block;
+  clear: both;
+}
+#menuItemList {
+  box-sizing:border-box;
+  width: 20rem;
+  /*float: left;*/
+  height:35rem;
+  background: rgba(26, 69, 129, 0.8);
+  border-right: 2px solid #EEEEEE;
+  border-bottom: 2px solid #EEEEEE;
+  color:#fff
+  over-flow:hidden;
+  overflow-y:scroll;
+  overflow-x:hidden;
+}
+#hiddenItemCtrlBar {
+  margin-left: 20rem;
+}
+
+#toolbarId {
+  display: block;
+  position: absolute;
+  bottom: 10rem;
+  left: 20rem;
+}
+#channelBar {
+  position: absolute;
+  top: 10rem;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: -moz-linear-gradient(to bottom, #1A3F86 20%, #1E69A2 60%, #1A3F86 20%);
+  background: linear-gradient(to bottom, #1E69A2, #1A3F86);
+}
+header {
+  height: 10rem;
+  background: #02488E;
+  line-height: 10rem;
+  font-size: 5rem;
+  text-align: center;
+  color: white;
+}
+#channelList li {
+  margin-top: 10rem;
+  float: left;
+  margin-right: 3rem;
+}
+#channelList li a {
+  font-size: 2rem;
+  display: inline-block;
+  color: white;
+  line-height: 15rem;
+  width: 17rem;
+  height: 15rem;
+  text-align: center;
+  border-radius: 2rem;
+  background: -moz-linear-gradient(to bottom, #1A3F86 20%, #1E69A2 60%, #1A3F86 20%);
+  background: linear-gradient(to bottom, #1E69A2, #1A3F86);
+  box-shadow: inset 4px 4px 0 rgba(255, 255, 255, 0.4), inset -4px -4px 0 rgba(0, 0, 0, 0.5);
+
+}
+#channelList li a:hover{
+  cursor: pointer;
+}
+
+
+
+.page1 {
+  display: block;
+}
+.page2 {
+  display: none;
+  position: absolute;
+  top: 10rem;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-image: url("../image/bg.jpg") ;
+  background-repeat: no-repeat;
+  background-position: top center;
+  background-size: cover;
+}
+#back {
+  position: absolute;
+  top: .5rem;
+  right: 1rem;
+  width: 4rem;
+  height: 4rem;
+  background: url(../image/home.png) no-repeat;
+  background-size: cover;
+  line-height: 3rem;
+  font-size: 1rem;
+  color: white;
+  text-align: center;
+  border-radius: .5rem;
+}
+
+#itemCtrlBar li {
+  font-size: larger;
+  float: left;
+  text-align: center;
+  color: #fff;
+  list-style: none;
+  cursor: pointer;
+  padding: 2rem 3rem;
+  margin: 0.2rem;
+  margin-left:1rem;
+  -moz-border-radius: 10px;   /* Gecko browsers */
+  -webkit-border-radius: 10px;   /* Webkit browsers */
+  border-radius: 10px;            /* W3C syntax */
+  background: -webkit-linear-gradient(#39F, #6FF);
+  background: -ms-linear-gradient(#39F, #6FF);
+  display: inline-block;
+  background: linear-gradient(to top, #087DE4,#E2F6FE );
+  box-shadow: inset 2px 2px 0 rgba(255, 255, 255, 0.4), inset -2px -2px 0 rgba(0, 0, 0, 0.5);
+}
+#title1 {
+  width: 20rem;
+  height: 5rem;
+  background: indianred;
+  position: absolute;
+  top: 0;
+  margin-left: 50%;
+}
+.menuitem {
+  font-size:large;
+  box-sizing: border-box;
+  border: none;
+  padding: 2rem 3rem;
+  cursor: pointer;
+  text-overflow: ellipsis;/*超出部分省略*/
+  white-space: nowrap;/*强制不换行*/
+  overflow:hidden;
+  width: 20rem;
+  text-align: center;
+  color: #fff;
+  display: inline-block;
+  margin-bottom:.5rem;
+  background:url("../image/btn_1.png") no-repeat;
+  background-position: top center;
+  background-size: contain;
+  /**background: linear-gradient(to top, #369FFF, #63F8FF);
+  box-shadow: inset 4px 4px 0 rgba(255, 255, 255, 0.4), inset -4px -4px 0 rgba(0, 0, 0, 0.5);**/
+}
+.menuitem:hover{
+	background:url("../image/btn_0.png") no-repeat;
+    background-position: top center;
+    background-size: contain;
+}
+.sendCmd {
+  float: left;
+  text-align: center;
+  color: #fff;
+  background: url("../image/btn_bg.png") no-repeat;
+  background-position: top center;
+  background-size: contain;
+}
+#cmdBar{
+	overflow:hidden;
+}
+#cmdBar li {
+  height: 6rem;
+  width: 13rem;
+  line-height: 5rem;
+  list-style: none;
+  cursor: pointer;
+  padding: 0 1rem;
+  margin: .5em;
+  text-align: center;
+  display: inline-block;
+  font-size:1.5rem;
+}
+li#volum1 {
+  width: 3.5rem;
+  height: 4.9rem;
+  background-image: url(../image/voice1.png);
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+li#volum2 {
+  width:3.5rem;
+  height: 4.9rem;
+  background-image: url(../image/voice2.png);
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+li#volum3 {
+  width: 3.5rem;
+  height: 4.9rem;
+  background-image: url(../image/mute.png);
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+.controlBarDiv {
+  display: none;
+  text-align: center;
+  padding: 1rem;
+  position: absolute;
+  top: 5rem;
+  left: 20rem;
+}
