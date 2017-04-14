@@ -11,7 +11,7 @@
             var out, i, len, c;
             out = "";
             len = str.length;
-            for(i =
+            for(i = 0; i < len; i++) {
                 c = str.charCodeAt(i);
                 if ((c >= 0x0001) && (c <= 0x007F)) {
                     out += str.charAt(i);
@@ -46,59 +46,55 @@
             text	: toUtf8("http://www.wisepeak.com")
         });
     </script>!-->
-
 </head>
 <body>
-<div>
-    <header>
-        智能控制系统
-    </header>
-    <div class="page1" >
-        <div id="channelBar" >
-            <ul name="channelList" id="channelList">
+<header>
+    智能控制系统
+</header>
+<div class="page1" >
+    <div id="channelBar" >
+        <ul name="channelList" id="channelList">
+        </ul>
+    </div>
+</div>
+<div class="page2" >
+    <div id="back"></div>
+    <input name="menuInfo" type="hidden" id="menuInfo" value="menuInfo" />
+    <input name="menuPath" type="hidden" id="menuPath" value="menuPath" />
+    <div id="toolbarId">
+        <div class="toolbar">
+            <ul id="cmdBar" class="bar">
+                <li class="sendCmd" onclick="docmd(69,0)" style="display:none;" >手动模式</li>
+                <li class="sendCmd" style="display:none;" onclick="docmd(14,0)" id="upJ">上一页</li>
+                <li class="sendCmd" style="display:none;" onclick="docmd(13,0)" id="downJ">下一页</li>
+                <li class="sendCmd" onclick="docmd(11,0)" >启 动</li>
+                <li class="sendCmd" onclick="docmd(21,0)" >暂停/继续</li><!--新添-->
+                <li class="sendCmd" onclick="docmd(70,0)" >停止节目单</li>
+                <li class="sendCmd" onclick="docmd(29,getSoundNum(10))" id="volum1"></li>
+                <li class="sendCmd" onclick="docmd(29,getSoundNum(-10))" id="volum2"></li>
+                <li class="sendCmd" onclick="docmd(29,getSoundNum(-255))" id="volum3"></li>
+                <li class="sendCmd" style="display:none;" onclick="docmd(100,2)" >最大化</li>
+                <li class="sendCmd" style="display:none;" onclick="docmd(100,0)" >最小化</li>
             </ul>
         </div>
     </div>
-    <div class="page2" >
-        <div id="back"></div>
-        <input name="menuInfo" type="hidden" id="menuInfo" value="menuInfo" />
-        <input name="menuPath" type="hidden" id="menuPath" value="menuPath" />
-        <div id="toolbarId">
-            <div class="toolbar">
-                <ul id="cmdBar" class="bar">
-                    <li class="sendCmd" onclick="docmd(69,0)" style="display:none;" >手动模式</li>
-                    <li class="sendCmd" style="display:none;" onclick="docmd(14,0)" id="upJ">上一页</li>
-                    <li class="sendCmd" style="display:none;" onclick="docmd(13,0)" id="downJ">下一页</li>
-                    <li class="sendCmd" onclick="docmd(11,0)" >启 动</li>
-                    <li class="sendCmd" onclick="docmd(21,0)" >暂停/继续</li><!--新添-->
-                    <li class="sendCmd" onclick="docmd(70,0)" >停止节目单</li>
-                    <li class="sendCmd" onclick="docmd(29,getSoundNum(10))" id="volum1" style="display:none;"></li>
-                    <li class="sendCmd" onclick="docmd(29,200)" id="volum2"></li>
-                    <li class="sendCmd" onclick="docmd(29,0)" id="volum3"></li>
-                    <li class="sendCmd" style="display:none;" onclick="docmd(100,2)" >最大化</li>
-                    <li class="sendCmd" style="display:none;" onclick="docmd(100,0)" >最小化</li>
-                </ul>
-            </div>
-        </div>
-        <div style=" font-size:1.5em; font-weight:bold; padding-left:1em;">播放内容：<span id="title"></span></div>
-        <div id="menuItemList"></div>
-        <div id="hiddenItemCtrlBar" style="display:none;" >
-            <div class="itemInfo"></div>
-            <div id="itemCtrlBar" >
-                <ul>
-                    <li cmdStr="" onclick="" title="TurnTask">播放任务</li>
-                    <li cmdStr="" onclick="" title="StopTask">停止播放</li>
-                    <li cmdStr="" onclick="" title="PageDown">下一页</li>
-                    <li cmdStr="" onclick="" title="PageUp">上一页</li>
-                    <li cmdStr="" onclick="" title="Home">首 页</li>
-                    <li cmdStr="" onclick="" title="End">尾 页</li>
+    <div style=" font-size:1.5em; font-weight:bold; padding-left:1em;">播放内容：<span id="title"></span></div>
+    <div id="menuItemList" style=" max-height:41rem; overflow:hidden;"></div>
+    <div id="hiddenItemCtrlBar" style="display:none;" >
+        <div class="itemInfo"></div>
+        <div id="itemCtrlBar" >
+            <ul>
+                <li cmdStr="" onclick="" title="TurnTask">播放任务</li>
+                <li cmdStr="" onclick="" title="StopTask">停止播放</li>
+                <li cmdStr="" onclick="" title="PageDown">下一页</li>
+                <li cmdStr="" onclick="" title="PageUp">上一页</li>
+                <li cmdStr="" onclick="" title="Home">首 页</li>
+                <li cmdStr="" onclick="" title="End">尾 页</li>
 
-                </ul>
-            </div>
+            </ul>
         </div>
-        <div dir="loadingMark"></div>
     </div>
-
+    <div dir="loadingMark"></div>
 </div>
 
 </body>
@@ -299,8 +295,8 @@
         //设置html的 fontsize
         var html_fontsize=html.style.fontSize=cw/100+"px";
         //设置左中右布局的高度
-
-//        var ch_rem=ch/parseFloat(html_fontsize)-11+"rem";
+        var ch_rem=ch/parseFloat(html_fontsize)-11+"rem";
+        $("#menuItemList").css("height",ch_rem);
         window.onresize=selSuit;
         //console.log("font-size:"+html.style.fontSize);
 //飞入左右选取
@@ -400,7 +396,7 @@
                         if(itemID=="0"){itemID=taskID;} //如果素材ID为0则任务号代替
                         var ctrlBarHtml="<div id='ctrlBar"+markID+"' class='controlBarDiv' ></div>";//节目项控制菜单
                         //var imagesrc="<span style='position:relative;top:0;left:0;'><img style='width:3em;height:3em;' src='"+iconLink+"' align='absmiddle'/></span>"//类型图片
-                        var tempstr="<div class='menuitem' itemType='"+itemType+"' markID='"+markID+"' iconLink='"+iconLink+"' descLink='"+descLink+"' downLink='"+downLink+"' taskName='"+taskName+"' moreInfo='"+moreInfo+"' taskDesc='"+taskDesc+"' duringTime='"+duringTime+"' winFrame='"+winFrame+"' downLink='"+downLink+"'  onclick=\"showCtrlBar('ctrlBar"+markID+"','"+taskID+"',"+itemType+");\" itemid='"+itemID +"'>"+taskDesc+"</div>";
+                        var tempstr="<div class='menuitem' itemType='"+itemType+"' markID='"+markID+"' iconLink='"+iconLink+"' descLink='"+descLink+"' downLink='"+downLink+"' taskName='"+taskName+"' moreInfo='"+moreInfo+"' taskDesc='"+taskDesc+"' duringTime='"+duringTime+"' winFrame='"+winFrame+"' downLink='"+downLink+"'  onclick=\"showCtrlBar('ctrlBar"+markID+"','"+taskID+"',"+itemType+");\" itemid='"+itemID +"'>"+taskDesc+"</div>"+ctrlBarHtml;
                         $("#menuItemList").append(tempstr);
                     });
                     timeShowMsg("title","加载数据成功！",500);
@@ -464,7 +460,7 @@
                 },
                 success:function(xml){
                     if(xml){
-                        //timeShowMsg("title","指令发送成功",500);		//发送成功
+                        timeShowMsg("title","指令发送成功",500);		//发送成功
                     }
                 }
             });
@@ -501,8 +497,8 @@
     function showCtrlBar(barID,taskID,itemtype){
     		//显示节目项目控制条函数
 		$(".menuitem").click(function(){
-//			$(".menuitem").css("background","url(image/btn_1.png) no-repeat");
-			$(this).css({"background":"url(image/btn_0.png) no-repeat", "backgroundPosition":"top center","backgroundSize": "contain"}).siblings().css({"background":"url(image/btn_1.png) no-repeat", "backgroundPosition":"top center","backgroundSize": "contain"});
+			$(".menuitem").css("background","url(image/btn_1.png) no-repeat");
+			$(this).css("background","url(image/btn_0.png) no-repeat");
 			});
         var taskName=$(this).attr("taskdesc");
         //console.log(taskName);
@@ -510,21 +506,21 @@
         var downLink = "";
         var flag = 0;
         markID=barID.replace("ctrlBar","");
-//        $(".controlBarDiv").hide();
+        $(".controlBarDiv").hide();
         $("#"+barID).show(0);
         downLink=$("#itemCtrlBar").find("li[title=DownLoadFile]").parents(".controlBarDiv").prev().attr("downLink");
         if (itemtype == 10 || itemtype == 1010)//处理视频
         {
 			$("#hiddenItemCtrlBar").show();
             $("#itemCtrlBar").find("li").show();
-			$("#itemCtrlBar").find("li[title=PageDown]").text("暂停");
-			$("#itemCtrlBar").find("li[title=PageUp]").text("继 续");
-            $("#itemCtrlBar").find("li[title=Home]").text("快进%10");
-            $("#itemCtrlBar").find("li[title=End]").text("快退%10");
+            $("#itemCtrlBar").find("li[title=PageDown]").text("暂停");
+            $("#itemCtrlBar").find("li[title=PageUp]").text("继续");
+            $("#itemCtrlBar").find("li[title=Home]").text("快进");
+            $("#itemCtrlBar").find("li[title=End]").text("快退");
             $("#itemCtrlBar").find("li[title=PageDown]").attr("onclick", "docmd(3002,0)"); //暂停播放
             $("#itemCtrlBar").find("li[title=PageUp]").attr("onclick", "docmd(3003,0)"); //继续播放
-            $("#itemCtrlBar").find("li[title=Home]").attr("onclick", "setPlayProc(+10000)"); //快进
-            $("#itemCtrlBar").find("li[title=End]").attr("onclick", "setPlayProc(-10000)"); //快退
+            $("#itemCtrlBar").find("li[title=Home]").attr("onclick", "docmd(3006,0)"); //快进
+            $("#itemCtrlBar").find("li[title=End]").attr("onclick", "docmd(3007,0)"); //快退
             flag = 1;
         }
         else if (itemtype == 8 || itemtype == 1008) //处理ppt
@@ -542,14 +538,14 @@
         }
         else if (itemtype == 0 || itemtype == 1000 || itemtype == 12 || itemtype == 1012) //处理其他应用
         {
-            if (downLink!=null && (downLink.indexOf(".ppt") >= 0 || downLink.indexOf(".pps") >= 0 || downLink.indexOf(".pptx") >= 0 ||  downLink.indexOf(".ppsx") >= 0))
+            if (downLink!=null && (downLink.indexOf(".ppt") >= 0 || downLink.indexOf(".pps") >= 0))
             {
 				$("#hiddenItemCtrlBar").show();
                 $("#itemCtrlBar").find("li").show();
                 $("#itemCtrlBar").find("li[title=PageDown]").text("上一页");
                 $("#itemCtrlBar").find("li[title=PageUp]").text("下一页");
-                $("#itemCtrlBar").find("li[title=Home]").text("首  页");
-                $("#itemCtrlBar").find("li[title=End]").text("尾  页");
+                $("#itemCtrlBar").find("li[title=Home]").text("首  页").hide();
+                $("#itemCtrlBar").find("li[title=End]").text("尾  页").hide();
                 $("#itemCtrlBar").find("li[title=PageDown]").attr("onclick", "docmd('keycode','0xFF55')"); //上一页PPT，PAGEDOWN键
                 $("#itemCtrlBar").find("li[title=PageUp]").attr("onclick", "docmd('keycode','0xFF9B')"); //下一页PPT，PAGEUP键
                 $("#itemCtrlBar").find("li[title=Home]").attr("onclick", "docmd('keycode','0xFF50')"); //跳转到PPT第一页，按HOME键
@@ -561,12 +557,12 @@
                 $("#itemCtrlBar").find("li").show();
                 $("#itemCtrlBar").find("li[title=PageDown]").text("暂停");
                 $("#itemCtrlBar").find("li[title=PageUp]").text("继续");
-            	$("#itemCtrlBar").find("li[title=Home]").text("快进%10");
-            	$("#itemCtrlBar").find("li[title=End]").text("快退%10");
+                $("#itemCtrlBar").find("li[title=Home]").text("快进");
+                $("#itemCtrlBar").find("li[title=End]").text("快退");
                 $("#itemCtrlBar").find("li[title=PageDown]").attr("onclick", "docmd(3002,0)"); //暂停播放
                 $("#itemCtrlBar").find("li[title=PageUp]").attr("onclick", "docmd(3003,0)"); //继续播放
-                $("#itemCtrlBar").find("li[title=Home]").attr("onclick", "setPlayProc(+10000)"); //快进
-                $("#itemCtrlBar").find("li[title=End]").attr("onclick", "setPlayProc(-10000)"); //快退
+                $("#itemCtrlBar").find("li[title=Home]").attr("onclick", "docmd(3006,0)"); //快进
+                $("#itemCtrlBar").find("li[title=End]").attr("onclick", "docmd(3007,0)"); //快退
                 flag = 1;
             }
         }
@@ -618,7 +614,6 @@
         var soundnum=$("#soundnum").text();
         soundnum=parseInt(soundnum);
         num=parseInt(num);
-		alert(soundnum);
         tempnum=soundnum+num;
         if(tempnum<=0){tempnum=0;}
         if(tempnum>=255){tempnum=255;}
@@ -660,35 +655,6 @@
             }
         });
     }
-	
-	//设置播放进度
-	function setPlayProc(num){
-		var url;
-        url="wpgetxmlids.asp?rnd="+Math.random(999);
-            $.ajax({
-                data:{username:"",password:""},
-                url: url,
-                dataType: 'xml',
-                type: 'GET',		//提交方式
-                timeout: 35000,		//失败时间
-                error: function(xml)
-                {
-                },
-                success: function(xml)
-                {
-			
-                    var playProc=$(xml).find("clientInfo ").attr("playProc");
-					playProc=playProc.split("_")[0];
-					//alert(playProc);
-					//alert(num);
-					playProc=parseInt(playProc)+parseInt(num);
-					$("#title").html(playProc);
-					playProc=playProc/10;
-					docmd(3040,num); 
-				}
-				});
-	}
-	
     function SendMSGBar(id,type){
         var isShow=$("#"+id).css("display");
         //alert(isShow);
@@ -731,15 +697,125 @@
 		$("#hiddenItemCtrlBar").hide();
     });
 //    添加按钮
+    $("li:contains('音量 + ')").css("background","url(../image/voice+.png)");
+</script>
+
+</html>nItemCtrlBar").html());
+
+        if (downLink!=null)
+        {
+            if(downLink.indexOf("http:")==0){
+
+            }else if(downLink.indexOf("DisplayFile")==0){
+                downLink="$$"+$("#menuPath").val()+"onlydownload_"+downLink;
+                downLink="http://"+window.location.host+"/"+downLink;
+            }else{
+                downLink="$$"+downLink;
+                downLink="http://"+window.location.host+"/"+downLink;
+            }
+            downLink=encodeURI(downLink);
+        }
+        if (flag == 1)
+        {
+            $("#itemCtrlBar").find("li[title=ViewItem]").text("控制条");
+            $("#itemCtrlBar").find("li[title=ViewItem]").attr("onclick", "docmd(3008,0)"); //显示/隐藏扩展窗口(标题条)
+        }
+        else
+        {
+            $("#itemCtrlBar").find("li[title=ViewItem]").text("预览素材");
+            if (downLink!=null) $("#itemCtrlBar").find("li[title=ViewItem]").attr("onclick","window.open('"+downLink.replace(downLink,"onlydownload_","")+"')");//预览文件
+        }
+        if (downLink!=null) $("#itemCtrlBar").find("li[title=DownLoadFile]").attr("onclick", "window.open('" + downLink + "')");  //下载文件
+
+    }
+    function getSoundNum(num){  //返回系统音量数值函数
+        var soundnum=$("#soundnum").text();
+        soundnum=parseInt(soundnum);
+        num=parseInt(num);
+        tempnum=soundnum+num;
+        if(tempnum<=0){tempnum=0;}
+        if(tempnum>=255){tempnum=255;}
+        $("#soundnum").text(tempnum);
+        return tempnum;
+    }
+    function getItemSoundNum(num){
+        var soundnum=$("#ItemSoundNum").text();
+        soundnum=parseInt(soundnum);
+        num=parseInt(num);
+        tempnum=soundnum+num;
+        if(tempnum<=0){tempnum=0;}
+        if(tempnum>=255){tempnum=255;}
+        //alert(tempnum)
+        $("#ItemSoundNum").text(tempnum);
+        return tempnum;
+    }
+    function changeTab(id){ //切换Tab内容
+        $(".bar").slideUp(100);
+        $("#"+id).slideDown(500);
+    }
+    function getUrl(url){
+        url=document.location.href+url;
+        //alert(url);
+        $.ajax({
+            data:{rnd:Math.random(999)},
+            url: url,
+            dataType:'html',
+            type: 'GET',
+            timeout: 15000,		//超时时间
+            error:function(xml){
+                //alert("发送指令失败");
+                timeShowMsg("title","发送指令失败",500);		//失败报错
+            },
+            success:function(xml){
+                if(xml){
+                    timeShowMsg("title","指令发送成功",500);		//发送成功
+                }
+            }
+        });
+    }
+    function SendMSGBar(id,type){
+        var isShow=$("#"+id).css("display");
+        //alert(isShow);
+        if(type=="show"){  //弹出输入框
+            $("#"+id).css({left:($(document).width()/2)-($("#"+id).width()/2),top:200});
+            $("#"+id).slideDown(200);
+        }else if(type=="send" || type=="send1"){		//发送信息
+            //http://localhost:8080/wpsubmitmsg.asp?wpsubmitmsg=我爱你&icon=0&sid=过客&pmt=
+            //wpsubmitmsg为发布的内容，icon为选择的头像0-30，sid为发布人自己标记，pmt为是否也在屏上悬浮显示（=0只参与网页中滚动显示，〉1表示消息在屏上显示）。
+            var wpsubmitmsg=$("#wpsubmitmsg").val();
+            var icon=$("#icon").val();
+            var sid=$("#sid").val();
+            var pmt=$("#pmt").attr("checked");
+            if(pmt=="checked"){
+                pmt=1;
+            }else{
+                pmt=0;
+            }
+            var url="";
+            if (type=="send")
+                url="wpsubmitmsg.asp?wpsubmitmsg="+wpsubmitmsg+"&icon="+icon+"&sid="+sid+"&pmt="+pmt+"&utf8=1";
+            else
+            {
+                if (sid=="")
+                    url="wpdispqrmsg.asp?wpdispqrmsg="+wpsubmitmsg+"&utf8=1";
+                else
+                    url="wpdispqrmsg.asp?wpdispqrmsg="+wpsubmitmsg+"&utf8=1&wpdispjustmsg="+sid;
+            }
+            getUrl(url);
+            $("#wpsubmitmsg").val("");
+            $("#"+id).slideUp(200);
+        }else if(type=="cancel"){	//取消发送关闭窗口
+            $("#"+id).slideUp(200);
+        }
+    }
+
+    $("#back").click(function(){
+        $(".page2").slideUp("slow");
+        $(".page1").slideDown("slow");
+		$("#hiddenItemCtrlBar").hide();
+    });
+//    添加按钮
+    $("li:contains('音量 + ')").css("background","url(../image/voice+.png)");
 </script>
 
 </html>
-
->
-
-</html>
-
-ript>
-
-</html>
-
